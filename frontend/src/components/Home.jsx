@@ -97,9 +97,29 @@ const App = () => {
                     <button className="search-button" onClick={handleSearch}>Search</button>
                 </div>
 
-                
+                <h4 style={{textAlign:"left", color:"rgb(134, 239, 172)"}}>Terminal</h4>
+                {loading ? 
+                (<p>Loading...</p>) 
+                :
+                (
+                    <div className="card-list">
+                        {cards.slice(1).map((card, index) => (
+                            <div key={index} className="card" onClick={() => navigateToTokenDetail(card)}>
+                                <div className="card-content">
+                                    <img src={card.tokenImageUrl} alt={card.name} className="card-image"/>
+                                    <div className="card-text">
+                                        <h2>Created by {card.creatorAddress}</h2>
+                                        <p>Funding Raised: {card.fundingRaised} ETH</p>
+                                        <p>{card.name} (ticker: {card.symbol})</p>
+                                        <p>{card.description}</p>
+                                    </div>
+                                </div>
+                            </div>  
+                        ))}
+                    </div>
+                )}
             </div>
-        </div>
+        </div> 
     )
 }
 
