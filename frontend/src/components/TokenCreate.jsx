@@ -48,7 +48,6 @@ const TokenCreate = () => {
         console.log('Creating token:', { name, ticker, description, imageUrl }); // in thong tin token ra man hinh console (chi muc dich kiem tra)
         navigate('/'); // quay ve trang chu sau khi tao token thanh cong
     };
-    
 
     return (
         <div className="app">
