@@ -62,6 +62,8 @@
   cursor: pointer;
 }
 
+/* trang tao token*/
+
 .token-create-container {
   display: flex;
   flex-direction: column;
@@ -118,3 +120,4 @@ textarea.input-field {
   font-size: 14px;
   cursor: pointer;
 }
+

@@ -1,4 +1,4 @@
-export const abi = [
+export const abi = [ // tao, luu tru va truy xuat meme token
     {
         "inputs" : [
             {
