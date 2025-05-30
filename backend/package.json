@@ -11,6 +11,14 @@
   "description": "",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.23.0"
+    "@nomicfoundation/hardhat-verify": "^2.0.14",
+    "chai": "^4.5.0",
+    "hardhat": "^2.24.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.3.0",
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "dotenv": "^16.5.0"
   }
 }
