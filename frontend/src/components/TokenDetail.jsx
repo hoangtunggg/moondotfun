@@ -25,11 +25,21 @@ import { ethers } from 'ethers';
 import '../App.css'; 
 import { abi } from './abi'; 
 import { tokenAbi } from './tokenAbi';
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from 'recharts';
+
 
 const TokenDetail = () => {
   const { tokenAddress } = useParams();
   const location = useLocation();
-  const { card } = location.state();l // lấy dữ liệu card được truyền qua từ trang home.jsx
+  const { card } = location.state || {}; // lấy dữ liệu card được truyền qua từ trang home.jsx
 
   const [owners, setOwners] = useState([]); // mang luu nhung nguoi so huu
   const [transfers, setTransfers] = useState([]); // mang luu nhung giao dich
@@ -38,11 +48,13 @@ const TokenDetail = () => {
   const [totalSupply, setTotalSupply] = useState('0'); // tong so luong cung token
   const [remainingTokens, setRemainingTokens] = useState('0'); // so luong token con lai
   const [cost, setCost] = useState('0'); // chi phi mua token
-  const [modalOpen, setModalOpen] = useState(false); // trang thai modal (cua so bat ra khi muon mua)
+  const [isModalOpen, setIsModalOpen] = useState(false); // trang thai modal (cua so bat ra khi muon mua)
   const navigate = useNavigate(); // dung de dieu huong trang web
+  const [ownerList, setOwnerList] = useState([]);
+  const [tokensSold, setTokensSold] = useState([]);
 
   // khoi tao token detail
-  const tokenDetail = card || { // neu khong co card thi tra ve object co dang tu dinh nghia
+  const tokenDetails = card || { // neu khong co card thi tra ve object co dang tu dinh nghia
       name: 'Unknown',
       symbol: 'Unknown',
       description: 'No description available',
@@ -51,7 +63,7 @@ const TokenDetail = () => {
       creatorAddress: '0x0000000000000000000000000000000000000000',
   }; 
 
-  const fundingraised = parseFloat(tokenDetail.fundingRaised.replace(' ETH', '')); // chuyen doi fundingRaised tu string sang so
+  const fundingRaised = parseFloat(tokenDetails.fundingRaised.replace(' ETH', '')); // chuyen doi fundingRaised tu string sang so
 
   // Hang so
   const maxSupply = parseInt(800000); // tong so luong token cung toi da
@@ -88,7 +100,7 @@ const TokenDetail = () => {
         const contract = new ethers.Contract(tokenAddress, tokenAbi, provider); // khoi tao contract token
         const totalSupplyResponse = await contract.totalSupply(); // lay tong so luong token
         var totalSupplyFormatted = parseInt(ethers.formatUnits(totalSupplyResponse, 'ether')) - 200000; // dinh dang lai tong so luong token
-        setTotalSupply(totalSupplyFormatted.toString()); // luu tong so luong token vao state totalSupply
+        setTotalSupply(parseInt(totalSupplyFormatted)); // luu tong so luong token vao state totalSupply
         setRemainingTokens(maxSupply - totalSupplyFormatted); // tinh so luong token con lai va luu vao state remainingTokens
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -99,20 +111,94 @@ const TokenDetail = () => {
     fetchData();   
   }, [tokenAddress]); // useEffect se chay lai khi tokenAddress thay doi
 
+
+
+
+//   useEffect(() => {
+//   const fetchData = async () => {
+//     try {
+//       // Fetch owners
+//       const ownersResponse = await fetch(
+//         `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/owners?chain=sepolia&order=DESC`,
+//         {
+//           headers: {
+//             accept: 'application/json',
+//             'X-API-Key': process.env.REACT_APP_X_API_KEY,
+//           },
+//         }
+//       );
+//       const ownersData = await ownersResponse.json();
+
+//       // Mapping owner list
+//       const formattedOwners = (ownersData.result || []).map((owner) => ({
+//         address: owner.owner_of || owner.owner_address,
+//         amount: parseFloat(owner.value) / 10 ** owner.token_decimals,
+//       }));
+
+//       setOwnerList(formattedOwners);
+
+//       // Fetch transfers
+//       const transfersResponse = await fetch(
+//         `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/transfers?chain=sepolia&order=DESC`,
+//         {
+//           headers: {
+//             accept: 'application/json',
+//             'X-API-Key': process.env.REACT_APP_X_API_KEY,
+//           },
+//         }
+//       );
+//       const transfersData = await transfersResponse.json();
+
+//       // Xử lý tokensSold theo thời gian
+//       const groupedTransfers = {};
+
+//       (transfersData.result || []).forEach((tx) => {
+//         const date = new Date(tx.block_timestamp).toLocaleTimeString([], {
+//           hour: '2-digit',
+//           minute: '2-digit',
+//         });
+
+//         const amount = parseFloat(tx.value) / 10 ** tx.token_decimals;
+
+//         if (!groupedTransfers[date]) {
+//           groupedTransfers[date] = amount;
+//         } else {
+//           groupedTransfers[date] += amount;
+//         }
+//       });
+
+//       const formattedTokensSold = Object.entries(groupedTransfers).map(
+//         ([time, value]) => ({
+//           time,
+//           value: parseFloat(value.toFixed(2)),
+//         })
+//       );
+
+//       setTokensSold(formattedTokensSold);
+//     } catch (error) {
+//       console.error('Lỗi fetch dữ liệu từ Moralis:', error);
+//     }
+//   };
+
+//   fetchData();
+// }, [tokenAddress]);
+
+
   // tinh toan phan tram funding
-  const fundingRaisedPercentage = (fundingraised / fundingGoal) * 100; // tinh phan tram funding da goi von
-  const totalSupplyPercentage = ((parseFloat(totalSupply) - 200000) / (ethers.formatUnits(maxSupply - 200000, 'ether'))) * 100; // tinh phan tram tong cung token
+  const fundingRaisedPercentage = (fundingRaised / fundingGoal) * 100; // tinh phan tram funding da goi von
+  const totalSupplyPercentage =
+    ((parseFloat(totalSupply) - 200000) / ethers.formatUnits(maxSupply - 200000, 'ether')) * 100; // tinh phan tram tong cung token
 
   // ham tinh toan chi phi mua token
   const getCost = async () => {
-    if(!purchaseAmount) return; // neu khong co so luong mua thi khong tinh toan
+    if (!purchaseAmount) return; // neu khong co so luong mua thi khong tinh toan
 
     try {
-      const provider = ethers.JsonRpcProvider(process.env.REACT_APP_RPC_URL); // ket noi toi blockchain Sepolia
+      const provider = new ethers.JsonRpcProvider(process.env.REACT_APP_RPC_URL); // ket noi toi blockchain Sepolia
       const contract = new ethers.Contract(process.env.REACT_APP_CONTRACT_ADDRESS, abi, provider); // khoi tao contract voi dia chi smart contract
-      const costInWei = await contract.getCost(purchaseAmount); // goi ham getCost de lay chi phi mua token
+      const costInWei = await contract.calculateCost(totalSupply, purchaseAmount); // goi ham getCost de lay chi phi mua token
       setCost(ethers.formatUnits(costInWei, 'ether')); // dinh dang chi phi tu wei sang ether va luu vao state cost
-      setModalOpen(true); // mo modal de xac nhan mua token
+      setIsModalOpen(true); // mo modal de xac nhan mua token
     } catch (error) {
       console.error('Error calculating cost:', error);
     }
@@ -121,15 +207,16 @@ const TokenDetail = () => {
   const handlePurchase = async () => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum); // ket noi toi blockchain qua trinh duyet
-      const signer = provider.getSigner(); // lay signer de ky giao dich
+      const signer = await provider.getSigner(); // lay signer de ky giao dich
       const contract = new ethers.Contract(process.env.REACT_APP_CONTRACT_ADDRESS, abi, signer); // khoi tao contract voi signer
 
-      const transaction = await contract.buyMemeToken(tokenAddress,purchaseAmount, {
-        value: ethers.parseUnits(cost, 'ether'), // chuyen doi chi phi sang ether
-      });
+      const transaction = await contract.buyMemeToken(tokenAddress, purchaseAmount,{
+        value: ethers.parseUnits(cost, 'ether'),
+      });  // chuyen doi chi phi sang ether
+
       const receipt = await transaction.wait(); // cho giao dich hoan thanh
       alert(`Transaction successful! Hash: ${receipt.hash}`); // thong bao giao dich thanh cong
-      setIsModalOpen(false); // dong modal sau khi mua token thanh cong
+      setIsModalOpen(false);  // dong modal sau khi mua token thanh cong
     } catch (error) {
       console.error('Error purchasing tokens:', error);
     }
@@ -137,10 +224,7 @@ const TokenDetail = () => {
 
   return (
     <div className="token-detail-container">
-      <nav className="navbar">
-        <a href="#" className="nav-link">[moralis]</a>
-        <a href="#" className="nav-link">[docs]</a>
-        <button className="nav-button">[connect wallet]</button>
+            <nav className="navbar">
       </nav>
 
       <h3 className="start-new-coin" onClick={() => navigate('/')}>[go back]</h3>
@@ -250,6 +334,44 @@ const TokenDetail = () => {
           </tbody>
         </table>
       )}
+
+      <h2 className="text-xl font-semibold my-4">Token Sold Over Time</h2>
+      <LineChart width={600} height={300} data={tokensSold}>
+        <CartesianGrid stroke="#ccc" />
+        <XAxis dataKey="time" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="value" stroke="#82ca9d" />
+      </LineChart>
+
+      <h2 className="text-xl font-semibold my-4">Top Token Holders</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-left text-sm text-gray-500">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="px-4 py-2">#</th>
+              <th className="px-4 py-2">Address</th>
+              <th className="px-4 py-2">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ownerList.slice(0, 10).map((owner, index) => (
+              <tr key={index} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-2">{index + 1}</td>
+                <td className="px-4 py-2 break-all">{owner.address}</td>
+                <td className="px-4 py-2">{owner.amount.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+
     </div>
   );
 }
+export default TokenDetail;
+
+
+
