@@ -1,24 +1,3 @@
-/*
-hiển thị thông tin chi tiết của một token ERC-20 cụ thể trên mạng Sepolia
-  Xem thông tin token (ảnh, địa chỉ, người tạo, số tiền đã gọi vốn,...)
-  Xem danh sách chủ sở hữu và giao dịch
-  Tính toán chi phí để mua token và mua trực tiếp token qua smart contract
-Flow
-  Lấy thông tin token từ URL và location
-  Khởi tạo các useState để lưu trữ thông tin
-  Fetch dữ liệu từ API & Blockchain
-  Tính phần trăm tiến độ funding và tiến độ bán token
-  Xử lý tính giá và mua token
-  Giao diện (UI)
-    Navbar
-    Thông tin token
-    Progress bars:
-    Mua token: 
-    Modal xác nhận mua:
-    Danh sách Owner:
-    Danh sách Transfer:
-*/
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
@@ -110,79 +89,6 @@ const TokenDetail = () => {
     };
     fetchData();   
   }, [tokenAddress]); // useEffect se chay lai khi tokenAddress thay doi
-
-
-
-
-//   useEffect(() => {
-//   const fetchData = async () => {
-//     try {
-//       // Fetch owners
-//       const ownersResponse = await fetch(
-//         `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/owners?chain=sepolia&order=DESC`,
-//         {
-//           headers: {
-//             accept: 'application/json',
-//             'X-API-Key': process.env.REACT_APP_X_API_KEY,
-//           },
-//         }
-//       );
-//       const ownersData = await ownersResponse.json();
-
-//       // Mapping owner list
-//       const formattedOwners = (ownersData.result || []).map((owner) => ({
-//         address: owner.owner_of || owner.owner_address,
-//         amount: parseFloat(owner.value) / 10 ** owner.token_decimals,
-//       }));
-
-//       setOwnerList(formattedOwners);
-
-//       // Fetch transfers
-//       const transfersResponse = await fetch(
-//         `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/transfers?chain=sepolia&order=DESC`,
-//         {
-//           headers: {
-//             accept: 'application/json',
-//             'X-API-Key': process.env.REACT_APP_X_API_KEY,
-//           },
-//         }
-//       );
-//       const transfersData = await transfersResponse.json();
-
-//       // Xử lý tokensSold theo thời gian
-//       const groupedTransfers = {};
-
-//       (transfersData.result || []).forEach((tx) => {
-//         const date = new Date(tx.block_timestamp).toLocaleTimeString([], {
-//           hour: '2-digit',
-//           minute: '2-digit',
-//         });
-
-//         const amount = parseFloat(tx.value) / 10 ** tx.token_decimals;
-
-//         if (!groupedTransfers[date]) {
-//           groupedTransfers[date] = amount;
-//         } else {
-//           groupedTransfers[date] += amount;
-//         }
-//       });
-
-//       const formattedTokensSold = Object.entries(groupedTransfers).map(
-//         ([time, value]) => ({
-//           time,
-//           value: parseFloat(value.toFixed(2)),
-//         })
-//       );
-
-//       setTokensSold(formattedTokensSold);
-//     } catch (error) {
-//       console.error('Lỗi fetch dữ liệu từ Moralis:', error);
-//     }
-//   };
-
-//   fetchData();
-// }, [tokenAddress]);
-
 
   // tinh toan phan tram funding
   const fundingRaisedPercentage = (fundingRaised / fundingGoal) * 100; // tinh phan tram funding da goi von

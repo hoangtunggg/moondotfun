@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
+import { useContext } from 'react';
+import { WalletContext } from './WalletContext';
 
 const NavBar = () => {
-  const [address, setAddress] = useState(null);
-  const [balance, setBalance] = useState(null);
+  const { address, setAddress, balance, setBalance } = useContext(WalletContext);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -18,8 +19,9 @@ const NavBar = () => {
         const userAddress = accounts[0];
         setAddress(userAddress);
 
-        const balance = await provider.getBalance(userAddress);
-        setBalance(ethers.formatEther(balance));
+        const balanceBigInt = await provider.getBalance(userAddress);
+        const balanceInEth = ethers.formatEther(balanceBigInt);
+        setBalance(balanceInEth);
       } catch (error) {
         console.error("Connection error:", error);
       }
@@ -39,6 +41,10 @@ const NavBar = () => {
       navigate(`/profile/${address}`);
       setIsDropdownOpen(false);
     }
+  };
+
+  const shortenAddress = (addr) => {
+    return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "";
   };
 
   return (
@@ -81,7 +87,7 @@ const NavBar = () => {
         {address ? (
           <div className="wallet-info">
             <span className="balance">
-              ({parseFloat(balance || 0).toFixed(2)} ETH)
+              ({parseFloat(balance || 0).toFixed(4)} ETH)
             </span>
             <div
               className="profile-dropdown"
@@ -92,7 +98,7 @@ const NavBar = () => {
                 alt="Profile"
                 className="nav-profile-avatar"
               />
-              <span className="username">qiwihui</span>
+              <span className="username">{shortenAddress(address)}</span>
               <span className="dropdown-arrow">▼</span>
               {isDropdownOpen && (
                 <div className="dropdown-menu">
